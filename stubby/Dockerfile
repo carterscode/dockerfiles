@@ -20,6 +20,6 @@ FROM debian:buster
 RUN apt-get update && apt-get install -y libyaml-0-2 openssl ca-certificates
 COPY --from=builder /usr/local/bin/stubby /stubby
 
-EXPOSE 8053
+EXPOSE 53
 
 CMD [ "/stubby" ]
