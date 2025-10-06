@@ -5,6 +5,8 @@ on:
     branches:
       - main
       - main-8.0.x
+    paths:
+      - 'suricata/**'
   schedule:
     - cron: '0 2 * * *'  # Daily at 2 AM UTC
   workflow_dispatch:
@@ -49,6 +51,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: Dockerfile
+          file: ./suricata/Dockerfile
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.tag }}
