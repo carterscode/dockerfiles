@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 env:
-  DOCKERHUB_USERNAME: carterfields
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
   IMAGE_NAME: suricata
 
 jobs:
@@ -35,22 +35,24 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Determine image tag
-        id: vars
-        run: |
-          if [[ "${{ github.ref_name }}" == "main" ]]; then
-            echo "tag=latest" >> $GITHUB_OUTPUT
-          elif [[ "${{ github.ref_name }}" == "main-8.0.x" ]]; then
-            echo "tag=dev" >> $GITHUB_OUTPUT
-          else
-            echo "Unsupported branch: ${{ github.ref_name }}"
-            exit 1
-          fi
-
-      - name: Build and push Docker image
+      # 🔹 Build the stable (main) branch image
+      - name: Build and push Suricata stable image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./suricata
           file: ./suricata/Dockerfile
+          build-args: |
+            SURICATA_BRANCH=main
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.tag }}
+          tags: carterfields/suricata:stable
+
+      # 🔹 Build the dev (main-8.0.x) branch image
+      - name: Build and push Suricata dev image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./suricata
+          file: ./suricata/Dockerfile
+          build-args: |
+            SURICATA_BRANCH=main-8.0.x
+          push: true
+          tags: carterfields/suricata:dev
