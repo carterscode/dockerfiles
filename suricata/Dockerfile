@@ -93,6 +93,8 @@ RUN apt-get update && \
 # Copy built Suricata files from builder stage
 COPY --from=builder /usr/bin/suricata /usr/bin/suricata
 COPY --from=builder /usr/lib /usr/lib
+# Platform-specific copy: only for x86_64 builds
+COPY --from=builder --platform=linux/amd64 /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu
 COPY --from=builder /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu
 COPY --from=builder /etc/suricata /etc/suricata
 COPY --from=builder /var/lib/suricata /var/lib/suricata
