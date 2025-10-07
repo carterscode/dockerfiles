@@ -44,7 +44,9 @@ jobs:
           build-args: |
             SURICATA_BRANCH=main
           push: true
-          tags: carterfields/suricata:stable
+          tags: |
+            carterfields/suricata:stable
+            carterfields/suricata:latest
 
       # 🔹 Build the dev (main-8.0.x) branch image
       - name: Build and push Suricata dev image
