@@ -95,7 +95,7 @@ and configuration file (`CONFIG`).
 
 ## 🔄 Workflow File
 
-The GitHub Actions workflow (`.github/workflows/build.yml`) handles the
+The GitHub Actions workflow (`.github/workflows/docker-suricata.yml`) handles the
 automation: - Checks out the code. - Sets up Docker Buildx (for
 multi-arch builds). - Authenticates with Docker Hub. - Builds and pushes
 both stable and development images.
@@ -108,7 +108,7 @@ both stable and development images.
     (builder + runtime).
 -   **entrypoint.sh** → Custom entrypoint script for flexible runtime
     configuration.
--   **.github/workflows/build.yml** → GitHub Actions workflow that
+-   **.github/workflows/docker-suricata.yml** → GitHub Actions workflow that
     automates builds and pushes to Docker Hub.
 
 ------------------------------------------------------------------------
