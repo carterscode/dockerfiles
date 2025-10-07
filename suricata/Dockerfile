@@ -3,6 +3,9 @@ FROM debian:bookworm-slim AS builder
 
 WORKDIR /build
 
+# Build arguments
+ARG SURICATA_BRANCH=main
+
 # Install base dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -53,7 +56,7 @@ RUN git clone https://github.com/ntop/nDPI.git && \
     make install
 
 # Clone, build, and install Suricata 8.x
-RUN git clone --branch main-8.0.x https://github.com/OISF/suricata.git && \
+RUN git clone --branch ${SURICATA_BRANCH} https://github.com/OISF/suricata.git && \
     cd suricata && \
     ./autogen.sh && \
     ./configure \
