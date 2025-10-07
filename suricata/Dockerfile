@@ -107,3 +107,4 @@ RUN mkdir -p /var/log/suricata /var/run/suricata
 
 # Default command
 CMD ["suricata", "-c", "/etc/suricata/suricata.yaml", "-i", "eth0", "--init-errors-fatal"]
+#test
