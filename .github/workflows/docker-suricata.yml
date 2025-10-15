@@ -2,31 +2,33 @@ name: Build and Push Suricata Docker Image
 
 on:
   push:
-    branches:
-      - main  # Only your own repo's main branch
-    paths:
-      - 'suricata/**'  # Only if suricata folder is changed
+    branches: [ main ]
+    paths: [ 'suricata/**' ]
   schedule:
-    - cron: '0 2 * * *'  # Daily at 2 AM UTC
+    - cron: '0 2 * * *'
   workflow_dispatch:
 
 env:
-  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-  IMAGE_NAME: suricata
+  IMAGE_REPO: carterfields/suricata
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
+
+      # Needed for cross-arch builds
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          install: true
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -34,28 +36,49 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 🔹 Build the stable (main) branch image
-      - name: Build and push Suricata stable image
+      # Optional cache to speed up repeated builds
+      - name: Configure cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      # Stable (main)
+      - name: Build & push stable (multi-arch)
         uses: docker/build-push-action@v5
         with:
           context: ./suricata
           file: ./suricata/Dockerfile
+          push: true
           platforms: linux/amd64,linux/arm64
           build-args: |
             SURICATA_BRANCH=main
-          push: true
           tags: |
-            carterfields/suricata:stable
-            carterfields/suricata:latest
+            ${{ env.IMAGE_REPO }}:stable
+            ${{ env.IMAGE_REPO }}:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+          provenance: false
 
-      # 🔹 Build the dev (main-8.0.x) branch image
-      - name: Build and push Suricata dev image
+      # Dev (main-8.0.x)
+      - name: Build & push dev (multi-arch)
         uses: docker/build-push-action@v5
         with:
           context: ./suricata
           file: ./suricata/Dockerfile
+          push: true
           platforms: linux/amd64,linux/arm64
           build-args: |
             SURICATA_BRANCH=main-8.0.x
-          push: true
-          tags: carterfields/suricata:dev
+          tags: ${{ env.IMAGE_REPO }}:dev
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+          provenance: false
+
+      # Workaround to persist cache between steps
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
