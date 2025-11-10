@@ -45,7 +45,8 @@ RUN rustc --version | grep -q "1.75.0" || \
 ENV PATH="/root/.cargo/bin:$PATH"
 
 # Install cbindgen (required for building Suricata with Rust)
-RUN cargo install --force cbindgen
+#RUN cargo install --force cbindgen
+RUN . "$HOME/.cargo/env" && cargo +stable install --locked cbindgen
 
 # Build and install nDPI
 RUN git clone https://github.com/ntop/nDPI.git && \
