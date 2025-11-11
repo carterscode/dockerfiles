@@ -49,9 +49,10 @@ ARG SURICATA_TAG=suricata-8.0.2
 RUN git clone --depth=1 --branch "${SURICATA_TAG}" https://github.com/OISF/suricata.git && \
     cd suricata && \
     ./autogen.sh && \
+    echo $PWD && \
     ./configure \
       --enable-nfqueue \
-      --enable-ndpi --with-ndpi=/nDPI \
+      --enable-ndpi --with-ndpi=../nDPI/src/include \
       # --enable-rust \
       # --with-hyperscan \
       --prefix=/usr \
