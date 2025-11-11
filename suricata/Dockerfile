@@ -35,32 +35,64 @@ RUN . "$HOME/.cargo/env" && cargo +stable install --locked cbindgen
 
 # Install nDPI before Suricata
 
-RUN git clone --depth=1 --branch "${NDPI_BRANCH}" https://github.com/ntop/nDPI.git && \
-    cd nDPI && \
+# RUN git clone --depth=1 --branch "${NDPI_BRANCH}" https://github.com/ntop/nDPI.git && \
+#     cd nDPI && \
+#     ./autogen.sh && \
+#     ./configure --prefix=/usr && \
+#     make -j"$(nproc)" && \
+#     make install
+
+# # -------- Build Suricata --------
+# # --- Clone, build, and install Suricata 8.0.2 (pinned tag) ---
+# ARG SURICATA_TAG=suricata-8.0.2
+# RUN git clone --depth=1 --branch "${SURICATA_TAG}" https://github.com/OISF/suricata.git && \
+#     cd suricata && \
+#     ./autogen.sh && \
+#     ./configure \
+#       --enable-nfqueue \
+#       --enable-ndpi --with-ndpi=/usr/include/ndpi \
+#       # --enable-rust \
+#       # --with-hyperscan \
+#       --prefix=/usr \
+#       --sysconfdir=/etc \
+#       --localstatedir=/var && \
+#     make -j"$(nproc)" && \
+#     make install-full && \
+#     ldconfig
+
+# ---------- Build nDPI ----------
+ARG NDPI_BRANCH=dev
+RUN git clone --depth=1 --branch "${NDPI_BRANCH}" https://github.com/ntop/nDPI.git /build/nDPI && \
+    cd /build/nDPI && \
     ./autogen.sh && \
     ./configure --prefix=/usr && \
     make -j"$(nproc)" && \
-    make install
+    make install && \
+    # sanity: confirm the header is where we expect
+    test -f /usr/include/ndpi/ndpi_api.h
 
+# Help pkg-config find libndpi.pc if nDPI installed one
+ENV PKG_CONFIG_PATH="/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/pkgconfig:${PKG_CONFIG_PATH}"
 
-# -------- Build Suricata --------
-# --- Clone, build, and install Suricata 8.0.2 (pinned tag) ---
+# ---------- Build Suricata (8.0.2) ----------
 ARG SURICATA_TAG=suricata-8.0.2
-RUN git clone --depth=1 --branch "${SURICATA_TAG}" https://github.com/OISF/suricata.git && \
-    cd suricata && \
+RUN git clone --depth=1 --branch "${SURICATA_TAG}" https://github.com/OISF/suricata.git /build/suricata && \
+    cd /build/suricata && \
     ./autogen.sh && \
-    echo $PWD && \
+    # Important: point directly to the dir that contains ndpi_api.h
+    NDPI_CFLAGS="-I/usr/include/ndpi" NDPI_LIBS="-lndpi" \
     ./configure \
+      --enable-plugins \
+      --enable-ndpi \
       --enable-nfqueue \
-      --enable-ndpi --with-ndpi=/usr/include/ndpi \
-      # --enable-rust \
-      # --with-hyperscan \
       --prefix=/usr \
       --sysconfdir=/etc \
       --localstatedir=/var && \
     make -j"$(nproc)" && \
     make install-full && \
     ldconfig
+
+
 
 # Strip Suricata binary and plugins to shrink size
 # (safe to strip; removes debug symbols)
@@ -102,6 +134,13 @@ COPY --from=builder /usr/lib/suricata      /usr/lib/suricata
 COPY --from=builder /usr/share/suricata    /usr/share/suricata
 COPY --from=builder /etc/suricata          /etc/suricata
 COPY --from=builder /var/lib/suricata      /var/lib/suricata
+
+# nDPI runtime (adjust the path if your builder installed to /usr/lib)
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libndpi*.so* /usr/lib/x86_64-linux-gnu/
+
+# Suricata plugins (includes ndpi.so)
+COPY --from=builder /usr/lib/suricata /usr/lib/suricata
+COPY --from=builder /usr/lib/x86_64-linux-gnu/suricata /usr/lib/x86_64-linux-gnu/suricata
 
 # Prepare runtime dirs
 RUN mkdir -p /var/log/suricata /var/run/suricata
