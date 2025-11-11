@@ -39,6 +39,7 @@ RUN git clone --depth=1 --branch "${NDPI_BRANCH}" https://github.com/ntop/nDPI.g
     ./autogen.sh && \
     ./configure --prefix=/usr && \
     make -j"$(nproc)" && \
+    echo $PWD && \
     make install
 
 # -------- Build Suricata --------
@@ -49,9 +50,9 @@ RUN git clone --depth=1 --branch "${SURICATA_TAG}" https://github.com/OISF/suric
     ./autogen.sh && \
     ./configure \
       --enable-nfqueue \
-      --enable-ndpi \
-      --enable-rust \
-      --with-hyperscan \
+      --enable-ndpi --with-ndpi=/home/user/src/nDPI \
+      # --enable-rust \
+      # --with-hyperscan \
       --prefix=/usr \
       --sysconfdir=/etc \
       --localstatedir=/var && \
