@@ -10,6 +10,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR /build
 
 # Base build deps
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential git ca-certificates curl wget \
     autoconf automake libtool pkg-config ragel \
@@ -21,6 +22,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     clang llvm \
  && rm -rf /var/lib/apt/lists/*
+ 
 
 # Rust (for Suricata’s Rust modules)
 RUN rustc --version 2>/dev/null | grep -q "1\.75\.0" || \
@@ -37,13 +39,12 @@ RUN . "$HOME/.cargo/env" && cargo +stable install --locked cbindgen
 #     cd nDPI && ./autogen.sh && ./configure --prefix=/usr && \
 #     make -j"$(nproc)" && make install
 
+# Build and install nDPI (CMake/Ninja)
 RUN git clone https://github.com/ntop/nDPI.git && \
     cd nDPI && \
     cmake -S . -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DNDPI_WITH_SURICATA=ON && \
     cmake --build build -j"$(nproc)" && \
     cmake --install build
-
-
 
 # -------- Build Suricata --------
 # --- Clone, build, and install Suricata 8.0.2 (pinned tag) ---
