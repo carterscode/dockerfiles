@@ -84,10 +84,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       ca-certificates \
       tini \
       suricata-update \
+      python3 python3-yaml \
    && rm -rf /var/lib/apt/lists/*
 
 # Copy ONLY Suricata artifacts; do NOT overwrite system libs
 COPY --from=builder /usr/bin/suricata      /usr/bin/suricata
+COPY --from=builder /usr/bin/suricata*     /usr/bin/
 COPY --from=builder /usr/lib/suricata      /usr/lib/suricata
 COPY --from=builder /usr/share/suricata    /usr/share/suricata
 COPY --from=builder /etc/suricata          /etc/suricata
