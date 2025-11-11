@@ -82,8 +82,7 @@ RUN git clone --depth=1 --branch "${SURICATA_TAG}" https://github.com/OISF/suric
     # Important: point directly to the dir that contains ndpi_api.h
     NDPI_CFLAGS="-I/usr/include/ndpi" NDPI_LIBS="-lndpi" \
     ./configure \
-      --enable-plugins \
-      --enable-ndpi \
+      --enable-ndpi --with-ndpi=/usr/include/ndpi \
       --enable-nfqueue \
       --prefix=/usr \
       --sysconfdir=/etc \
@@ -91,8 +90,6 @@ RUN git clone --depth=1 --branch "${SURICATA_TAG}" https://github.com/OISF/suric
     make -j"$(nproc)" && \
     make install-full && \
     ldconfig
-
-
 
 # Strip Suricata binary and plugins to shrink size
 # (safe to strip; removes debug symbols)
