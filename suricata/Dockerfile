@@ -135,12 +135,12 @@ COPY --from=builder /usr/share/suricata    /usr/share/suricata
 COPY --from=builder /etc/suricata          /etc/suricata
 COPY --from=builder /var/lib/suricata      /var/lib/suricata
 
-# nDPI runtime (adjust the path if your builder installed to /usr/lib)
+# nDPI runtime library (bookworm multiarch path)
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libndpi*.so* /usr/lib/x86_64-linux-gnu/
 
 # Suricata plugins (includes ndpi.so)
 COPY --from=builder /usr/lib/suricata /usr/lib/suricata
-COPY --from=builder /usr/lib/x86_64-linux-gnu/suricata /usr/lib/x86_64-linux-gnu/suricata
+#COPY --from=builder /usr/lib/x86_64-linux-gnu/suricata /usr/lib/x86_64-linux-gnu/suricata
 
 # Prepare runtime dirs
 RUN mkdir -p /var/log/suricata /var/run/suricata
