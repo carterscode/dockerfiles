@@ -50,7 +50,7 @@ RUN git clone --depth=1 --branch "${SURICATA_TAG}" https://github.com/OISF/suric
     ./autogen.sh && \
     ./configure \
       --enable-nfqueue \
-      --enable-ndpi --with-ndpi=/home/user/src/nDPI \
+      --enable-ndpi --with-ndpi=/build/suricata/plugins/ndpi \
       # --enable-rust \
       # --with-hyperscan \
       --prefix=/usr \
