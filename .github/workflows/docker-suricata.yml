@@ -3,7 +3,7 @@ name: Build and Push Suricata Docker Image
 on:
   push:
     branches:
-      - main-8.0.x  # Only your own repo's main branch
+      - main  # Only your own repo's main branch
     paths:
       - 'suricata/**'  # Only if suricata folder is changed
   schedule:
