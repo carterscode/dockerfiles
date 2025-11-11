@@ -4,7 +4,7 @@
 FROM debian:bookworm-slim AS builder
 
 ARG SURICATA_BRANCH=v8.0.2
-ARG NDPI_BRANCH=4.10  # pick a stable nDPI tag you trust
+ARG NDPI_BRANCH=4.14  # pick a stable nDPI tag you trust
 ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /build
