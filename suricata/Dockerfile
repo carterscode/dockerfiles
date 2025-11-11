@@ -38,7 +38,7 @@ RUN . "$HOME/.cargo/env" && cargo +stable install --locked cbindgen
 RUN git clone --depth=1 --branch "${NDPI_BRANCH}" https://github.com/ntop/nDPI.git && \
     cd nDPI && \
     ./autogen.sh && \
-    ./configure && \
+    ./configure --prefix=/usr && \
     make -j"$(nproc)" && \
     make install
 
@@ -52,7 +52,7 @@ RUN git clone --depth=1 --branch "${SURICATA_TAG}" https://github.com/OISF/suric
     echo $PWD && \
     ./configure \
       --enable-nfqueue \
-      --enable-ndpi --with-ndpi=../nDPI/src/include \
+      --enable-ndpi --with-ndpi=/usr/include/ndpi \
       # --enable-rust \
       # --with-hyperscan \
       --prefix=/usr \
