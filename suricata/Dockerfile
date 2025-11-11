@@ -34,12 +34,14 @@ ENV PATH="/root/.cargo/bin:$PATH"
 RUN . "$HOME/.cargo/env" && cargo +stable install --locked cbindgen
 
 # Install nDPI before Suricata
+
 RUN git clone --depth=1 --branch "${NDPI_BRANCH}" https://github.com/ntop/nDPI.git && \
-    && cd /build/ndpi \
-    && ./autogen.sh \
-    && ./configure \
+    cd /build/ndpi && \
+    ./autogen.sh && \
+    ./configure && \
     make -j"$(nproc)" && \
     make install
+
 
 # -------- Build Suricata --------
 # --- Clone, build, and install Suricata 8.0.2 (pinned tag) ---
