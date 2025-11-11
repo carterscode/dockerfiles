@@ -23,7 +23,7 @@ environment with automatic updates and multi-platform support.
 ## ⚙️ Automated Build & Deployment
 
 The build process is fully automated using **GitHub Actions**. Every
-time changes are pushed to the repository's `main` branch (or scheduled
+time changes are pushed to the repository's `main-8.0.x` branch (or scheduled
 daily at 2 AM UTC), the workflow will:
 
 1.  **Build Suricata from source** (including dependencies such as nDPI
@@ -42,7 +42,7 @@ daily at 2 AM UTC), the workflow will:
         `main` branch.
     -   `carterfields/suricata:latest` → Alias for stable.
     -   `carterfields/suricata:dev` → Development build from the
-        `main-8.0.x` branch.
+        `main` branch.
 
 ------------------------------------------------------------------------
 
