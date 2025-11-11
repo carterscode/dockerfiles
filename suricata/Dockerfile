@@ -89,6 +89,7 @@ RUN apt-get update && \
     libpcre2-8-0 \
     zlib1g \
     libsystemd0 \
+    ca-certificates \
     suricata-update \
     && rm -rf /var/lib/apt/lists/*
 
