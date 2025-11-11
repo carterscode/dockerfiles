@@ -56,20 +56,35 @@ RUN git clone https://github.com/ntop/nDPI.git && \
     make -j"$(nproc)" && \
     make install
 
-# Clone, build, and install Suricata 8.x
-RUN git clone --branch ${SURICATA_BRANCH} https://github.com/OISF/suricata.git && \
+# --- Clone, build, and install Suricata 8.0.2 (pinned tag) ---
+ARG SURICATA_TAG=suricata-8.0.2
+RUN git clone --depth=1 --branch "${SURICATA_TAG}" https://github.com/OISF/suricata.git && \
     cd suricata && \
     ./autogen.sh && \
     ./configure \
-        --enable-nfqueue \
-        --enable-ndpi \
-        --enable-rust \
-        --prefix=/usr \
-        --sysconfdir=/etc \
-        --localstatedir=/var && \
+      --enable-nfqueue \
+      --enable-ndpi \
+      --enable-rust \
+      --with-hyperscan \
+      --prefix=/usr \
+      --sysconfdir=/etc \
+      --localstatedir=/var && \
     make -j"$(nproc)" && \
     make install-full && \
     ldconfig
+#RUN git clone --branch ${SURICATA_BRANCH} https://github.com/OISF/suricata.git && \
+    # cd suricata && \
+    # ./autogen.sh && \
+    # ./configure \
+    #     --enable-nfqueue \
+    #     --enable-ndpi \
+    #     --enable-rust \
+    #     --prefix=/usr \
+    #     --sysconfdir=/etc \
+    #     --localstatedir=/var && \
+    # make -j"$(nproc)" && \
+    # make install-full && \
+    # ldconfig
 
 # Stage 2: Runtime image
 FROM debian:bookworm-slim AS runtime
