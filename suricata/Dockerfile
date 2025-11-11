@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libmagic-dev libcap-ng-dev libnetfilter-queue-dev libnfnetlink-dev \
     liblz4-dev libpcre2-dev zlib1g-dev libsystemd-dev \
     libhyperscan-dev \
+    cmake ninja-build \
     python3 \
     clang llvm \
  && rm -rf /var/lib/apt/lists/*
@@ -32,9 +33,17 @@ ENV PATH="/root/.cargo/bin:$PATH"
 RUN . "$HOME/.cargo/env" && cargo +stable install --locked cbindgen
 
 # -------- Build nDPI (shared lib) --------
-RUN git clone --depth=1 --branch "${NDPI_BRANCH}" https://github.com/ntop/nDPI.git && \
-    cd nDPI && ./autogen.sh && ./configure --prefix=/usr && \
-    make -j"$(nproc)" && make install
+# RUN git clone --depth=1 --branch "${NDPI_BRANCH}" https://github.com/ntop/nDPI.git && \
+#     cd nDPI && ./autogen.sh && ./configure --prefix=/usr && \
+#     make -j"$(nproc)" && make install
+
+RUN git clone https://github.com/ntop/nDPI.git && \
+    cd nDPI && \
+    cmake -S . -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DNDPI_WITH_SURICATA=ON && \
+    cmake --build build -j"$(nproc)" && \
+    cmake --install build
+
+
 
 # -------- Build Suricata --------
 # --- Clone, build, and install Suricata 8.0.2 (pinned tag) ---
