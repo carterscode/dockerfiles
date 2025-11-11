@@ -39,7 +39,7 @@ daily at 2 AM UTC), the workflow will:
 -   **Platforms**: Builds for both `linux/amd64` and `linux/arm64`.
 -   **Tags**:
     -   `carterfields/suricata:stable` → Latest stable build from the
-        `main` branch.
+        `main-8.0.x` branch.
     -   `carterfields/suricata:latest` → Alias for stable.
     -   `carterfields/suricata:dev` → Development build from the
         `main` branch.
