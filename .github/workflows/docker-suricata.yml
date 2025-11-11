@@ -3,7 +3,7 @@ name: Build and Push Suricata Docker Image
 on:
   push:
     branches:
-      - main  # Only your own repo's main branch
+      - main-8.0.x  # Only your own repo's main branch
     paths:
       - 'suricata/**'  # Only if suricata folder is changed
   schedule:
@@ -41,7 +41,7 @@ jobs:
           context: ./suricata
           file: ./suricata/Dockerfile
           build-args: |
-            SURICATA_BRANCH=main
+            SURICATA_BRANCH=main-8.0.x
           push: true
           tags: |
             carterfields/suricata:stable
@@ -54,6 +54,6 @@ jobs:
           context: ./suricata
           file: ./suricata/Dockerfile
           build-args: |
-            SURICATA_BRANCH=main-8.0.x
+            SURICATA_BRANCH=main
           push: true
           tags: carterfields/suricata:dev
