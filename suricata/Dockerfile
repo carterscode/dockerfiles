@@ -33,7 +33,6 @@ RUN apt-get update && \
     llvm \
     ca-certificates \
     libsystemd-dev \
-    suricata-update \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Rust 1.75.0 if not already present
@@ -90,6 +89,7 @@ RUN apt-get update && \
     libpcre2-8-0 \
     zlib1g \
     libsystemd0 \
+    suricata-update \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy built Suricata files from builder stage
