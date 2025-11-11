@@ -61,35 +61,38 @@ RUN . "$HOME/.cargo/env" && cargo +stable install --locked cbindgen
 #     ldconfig
 
 # ---------- Build nDPI ----------
-ARG NDPI_BRANCH=dev
+# -------- Build nDPI (install into /usr) --------
+ARG NDPI_BRANCH=4.14-stable
 RUN git clone --depth=1 --branch "${NDPI_BRANCH}" https://github.com/ntop/nDPI.git /build/nDPI && \
     cd /build/nDPI && \
     ./autogen.sh && \
     ./configure --prefix=/usr && \
     make -j"$(nproc)" && \
     make install && \
-    # sanity: confirm the header is where we expect
-    test -f /usr/include/ndpi/ndpi_api.h
+    ldconfig
 
 # Help pkg-config find libndpi.pc if nDPI installed one
 ENV PKG_CONFIG_PATH="/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/pkgconfig:${PKG_CONFIG_PATH}"
 
-# ---------- Build Suricata (8.0.2) ----------
+# -------- Build Suricata --------
 ARG SURICATA_TAG=suricata-8.0.2
 RUN git clone --depth=1 --branch "${SURICATA_TAG}" https://github.com/OISF/suricata.git /build/suricata && \
     cd /build/suricata && \
     ./autogen.sh && \
-    # Important: point directly to the dir that contains ndpi_api.h
+    # sanity-check: ensure header exists where we point --with-ndpi
+    test -f /usr/include/ndpi/ndpi_api.h && echo "ndpi_api.h FOUND in /usr/include/ndpi" || (echo "ndpi_api.h missing"; exit 1); \
     NDPI_CFLAGS="-I/usr/include/ndpi" NDPI_LIBS="-lndpi" \
     ./configure \
+      --enable-plugins \
       --enable-ndpi --with-ndpi=/usr/include/ndpi \
       --enable-nfqueue \
       --prefix=/usr \
       --sysconfdir=/etc \
       --localstatedir=/var && \
     make -j"$(nproc)" && \
-    make install-full && \
+    make install-conf install && \
     ldconfig
+
 
 # Strip Suricata binary and plugins to shrink size
 # (safe to strip; removes debug symbols)
