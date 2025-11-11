@@ -33,6 +33,7 @@ RUN apt-get update && \
     llvm \
     ca-certificates \
     libsystemd-dev \
+    suricata-update \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Rust 1.75.0 if not already present
