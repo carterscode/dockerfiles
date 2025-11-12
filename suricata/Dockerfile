@@ -3,7 +3,7 @@
 # =========================================================
 FROM debian:bookworm-slim AS builder
 
-ARG SURICATA_BRANCH=v8.0.2
+ARG SURICATA_BRANCH=suricata-8.0.2
 ARG NDPI_BRANCH=4.14-stable  # pick a stable nDPI tag you trust
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -80,7 +80,7 @@ RUN mkdir -p /ndpi-out && \
     cp -a /opt/ndpi/src/lib/libndpi.a   /ndpi-out/ 2>/dev/null || true
 
 # ---- build Suricata with the nDPI plugin ----
-ARG SURICATA_TAG=v8.0.2
+ARG SURICATA_TAG=suricata-8.0.2
 RUN git clone --depth=1 --branch "${SURICATA_TAG}" https://github.com/OISF/suricata.git /build/suricata && \
     cd /build/suricata && \
     ./autogen.sh && \
