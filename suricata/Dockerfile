@@ -62,36 +62,29 @@ RUN . "$HOME/.cargo/env" && cargo +stable install --locked cbindgen
 
 # ---------- Build nDPI ----------
 ARG NDPI_BRANCH=4.14-stable
-ARG NDPI_PREFIX=/usr
-ARG NDPI_INCLUDEDIR=${NDPI_PREFIX}/include/ndpi
-
-RUN git clone --depth=1 --branch "${NDPI_BRANCH}" https://github.com/ntop/nDPI.git /build/nDPI && \
-    cd /build/nDPI && \
+# ---- build nDPI from source, keep the tree for Suricata's plugin build ----
+RUN git clone --depth=1 --branch "${NDPI_TAG}" https://github.com/ntop/nDPI.git /opt/ndpi && \
+    cd /opt/ndpi && \
     ./autogen.sh && \
-    ./configure --prefix="${NDPI_PREFIX}" && \
-    make -j"$(nproc)" && \
-    make install && \
-    ldconfig && \
-    # sanity checks
-    test -f "${NDPI_INCLUDEDIR}/ndpi_api.h"
-    
-# Make sure pkg-config can see ndpi.pc wherever it was installed
-ENV PKG_CONFIG_PATH="/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}"
+    ./configure --disable-shared --enable-static && \
+    make -j"$(nproc)"
 
-# -------- Build Suricata --------
+# sanity checks (optional but very helpful while iterating)
+RUN test -f /opt/ndpi/src/include/ndpi_api.h
+RUN test -f /opt/ndpi/src/lib/libndpi.a
+
+# ---- build Suricata with the nDPI plugin ----
 ARG SURICATA_TAG=suricata-8.0.2
 RUN git clone --depth=1 --branch "${SURICATA_TAG}" https://github.com/OISF/suricata.git /build/suricata && \
     cd /build/suricata && \
     ./autogen.sh && \
-    # prove we really have the header where we’re about to point Suricata
-    test -f "${NDPI_INCLUDEDIR}/ndpi_api.h" && echo "ndpi_api.h FOUND at ${NDPI_INCLUDEDIR}" || (echo "ndpi_api.h missing"; exit 1); \
-    # (1) keep your exact string, (2) add plugins, (3) defensively add the include
-    PKG_CONFIG_PATH="${PKG_CONFIG_PATH}" \
-    CPPFLAGS="-I${NDPI_INCLUDEDIR}" \
+    # Keep your exact flags; just change the PATH value:
+    CPPFLAGS="-I/opt/ndpi/src/include" \
+    LDFLAGS="-L/opt/ndpi/src/lib" \
     ./configure \
       --enable-plugins \
       --enable-nfqueue \
-      --enable-ndpi --with-ndpi="${NDPI_INCLUDEDIR}" \
+      --enable-ndpi --with-ndpi=/opt/ndpi \
       --prefix=/usr \
       --sysconfdir=/etc \
       --localstatedir=/var && \
