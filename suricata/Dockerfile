@@ -73,6 +73,12 @@ RUN git clone --depth=1 --branch "${NDPI_BRANCH}" https://github.com/ntop/nDPI.g
 RUN test -f /opt/ndpi/src/include/ndpi_api.h
 RUN test -f /opt/ndpi/src/lib/libndpi.a
 
+# After nDPI make step (and before Suricata build)
+# Gather whatever nDPI produced so the runtime stage can copy from a single place
+RUN mkdir -p /ndpi-out && \
+    cp -a /opt/ndpi/src/lib/libndpi.so* /ndpi-out/ 2>/dev/null || true && \
+    cp -a /opt/ndpi/src/lib/libndpi.a   /ndpi-out/ 2>/dev/null || true
+
 # ---- build Suricata with the nDPI plugin ----
 ARG SURICATA_TAG=suricata-8.0.2
 RUN git clone --depth=1 --branch "${SURICATA_TAG}" https://github.com/OISF/suricata.git /build/suricata && \
@@ -145,8 +151,10 @@ COPY --from=builder /usr/bin/suricata /usr/bin/suricata
 COPY --from=builder /usr/lib/suricata /usr/lib/suricata
 
 # nDPI library (copy from whichever path it landed in)
-COPY --from=builder /usr/lib/libndpi*.so* /usr/lib/  || true
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libndpi*.so* /usr/lib/x86_64-linux-gnu/ || true
+# COPY --from=builder /usr/lib/libndpi*.so* /usr/lib/  || true
+# COPY --from=builder /usr/lib/x86_64-linux-gnu/libndpi*.so* /usr/lib/x86_64-linux-gnu/ || true
+# Copy whichever nDPI libs were produced
+COPY --from=builder /ndpi-out/ /usr/lib/
 
 # Config and data (if you copy them)
 COPY --from=builder /etc/suricata /etc/suricata
