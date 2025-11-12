@@ -63,7 +63,7 @@ RUN . "$HOME/.cargo/env" && cargo +stable install --locked cbindgen
 # ---------- Build nDPI ----------
 ARG NDPI_BRANCH=4.14-stable
 # ---- build nDPI from source, keep the tree for Suricata's plugin build ----
-RUN git clone --depth=1 --branch "${NDPI_TAG}" https://github.com/ntop/nDPI.git /opt/ndpi && \
+RUN git clone --depth=1 --branch "${NDPI_BRANCH}" https://github.com/ntop/nDPI.git /opt/ndpi && \
     cd /opt/ndpi && \
     ./autogen.sh && \
     ./configure --disable-shared --enable-static && \
